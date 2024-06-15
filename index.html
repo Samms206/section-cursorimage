@@ -77,17 +77,18 @@
             align-items: center;
             flex-direction: column;
         }
-        .text-reveal{
+
+        .text-reveal {
             color: black;
             position: relative;
             overflow: hidden;
         }
 
-        .line{
+        .line {
             position: relative;
         }
 
-        .line-mask{
+        .line-mask {
             position: absolute;
             top: 0;
             right: 0;
@@ -154,7 +155,8 @@
         <div id="counter">0+</div>
     </div>
     <div class="section" id="text-reveal-section">
-        <h1 id="target-text" class="text-reveal">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Exercitationem nisi quod voluptatibus
+        <h1 id="target-text" class="text-reveal">Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+            Exercitationem nisi quod voluptatibus
             quas accusantium consequatur ipsam, rerum, distinctio ducimus, voluptates eos at culpa officia eligendi
             nihil asperiores et architecto tenetur. sit amet, consectetur adipisicing elit. Exercitationem nisi quod
             voluptatibus quas accusantium consequatur ipsam, rerum, distinctio ducimus, voluptates eos at culpa officia
@@ -242,7 +244,55 @@
 
             observer.observe(counterElement);
         });
+        //text reveal
+        function runSplit() {
+            let currentElement = $(".text-reveal");
+            let text_target = new SplitType(currentElement, {
+                types: "lines"
+            });
+            $(".line").each(function (index) {
+                $(this).append("<div class='line-mask'></div>");
+            });
 
+            // Adjust the width of each line mask to create an inverted triangle effect
+            let lines = $(".line");
+            let baseWidth = 30; // base width in percentage for the top line mask
+            let decrement = baseWidth / lines.length;
+
+            lines.each(function (index) {
+                let widthPercentage = baseWidth + (index * decrement);
+                $(this).find('.line-mask').css("width", `${widthPercentage}%`);
+            });
+        }
+
+        runSplit();
+
+        window.addEventListener("resize", function () {
+            $(".text-reveal").find(".line-mask").remove(); // Remove existing masks before re-splitting
+            text_target.revert();
+            runSplit();
+        });
+
+        // Observer to detect when the text-reveal section enters the viewport
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    $(".line-mask").each(function (index) {
+                        gsap.to($(this), {
+                            width: "0%",
+                            delay: index * 0.3,
+                            duration: 1,
+                            ease: "power2.out"
+                        });
+                    });
+                    observer.unobserve(entry.target); // Stop observing after animation starts
+                }
+            });
+        }, {
+            threshold: 0
+        }); // Adjust threshold as needed
+
+        observer.observe(document.getElementById('text-reveal-section'));
     </script>
 </body>
 
