@@ -65,7 +65,7 @@
             gap: 40px;
         }
 
-        #counter {
+        .counter {
             font-size: 50px;
         }
 
@@ -152,7 +152,9 @@
     </div>
     <div class="section" id="counter-section">
         <h1>Count Up Example</h1>
-        <div id="counter">0+</div>
+        <div class="counter" id="counter1">0+</div>
+        <div class="counter" id="counter2">0+</div>
+        <div class="counter" id="counter3">0+</div>
     </div>
     <div class="section" id="text-reveal-section">
         <h1 id="target-text" class="text-reveal">Lorem ipsum dolor sit amet, consectetur adipisicing elit.
@@ -175,6 +177,7 @@
             let index = 0;
             const distanceThreshold = 140;
             const $wrappers = $('.image-wrapper');
+            
 
             function animateImages(cursorX, cursorY, rotateStart, rotateEnd, translateStart, translateEnd) {
                 const wrapper = $wrappers.eq(index % $wrappers.length).clone();
@@ -188,6 +191,7 @@
                 }).appendTo('.image-container');
 
                 const image = wrapper.find('img');
+                console.log(image);
                 image.addClass('active').one('animationend', function () {
                     wrapper.remove();
                 });
@@ -197,8 +201,9 @@
             }
 
             $('.hover-section').on('mousemove', function (e) {
+                console.log(e.pageX, e.pageY);
                 const distance = Math.sqrt(Math.pow(e.pageX - lastX, 2) + Math.pow(e.pageY - lastY, 2));
-
+               
                 if (distance > distanceThreshold) {
                     const rotateStart = e.pageX > lastX ? '-5deg' : '5deg';
                     const rotateEnd = e.pageX > lastX ? '5deg' : '-5deg';
@@ -229,34 +234,35 @@
         }
 
         $(document).ready(function () {
-            const counterElement = $('#counter')[0];
+            const counterElement = $('#counter1')[0];
+            const counterElement2 = $('#counter2')[0];
+            const counterElement3 = $('#counter3')[0];
 
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        countUp(counterElement, 0, 100,
-                            2000);
-                        observer.unobserve(
-                            counterElement);
+                        countUp(counterElement, 0, 100, 2000);
+                        countUp(counterElement2, 0, 70, 2000);
+                        countUp(counterElement3, 0, 50, 2000);
+                        observer.unobserve(counterElement);
                     }
                 });
             });
 
             observer.observe(counterElement);
         });
+
         //text reveal
         function runSplit() {
             let currentElement = $(".text-reveal");
-            let text_target = new SplitType(currentElement, {
-                types: "lines"
-            });
+            let text_target = new SplitType(currentElement, { types: "lines" });
             $(".line").each(function (index) {
                 $(this).append("<div class='line-mask'></div>");
             });
 
             // Adjust the width of each line mask to create an inverted triangle effect
             let lines = $(".line");
-            let baseWidth = 30; // base width in percentage for the top line mask
+            let baseWidth = 50; // base width in percentage for the top line mask
             let decrement = baseWidth / lines.length;
 
             lines.each(function (index) {
@@ -274,9 +280,18 @@
         });
 
         // Observer to detect when the text-reveal section enters the viewport
-        const observer = new IntersectionObserver((entries) => {
+        const observerTextReveal = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
+                    // Reset line masks before starting the animation
+                    $(".line-mask").css("width", function (index) {
+                        let lines = $(".line");
+                        let baseWidth = 30; // base width in percentage for the top line mask
+                        let decrement = baseWidth / lines.length;
+                        let widthPercentage = baseWidth + (index * decrement);
+                        return `${widthPercentage}%`;
+                    });
+
                     $(".line-mask").each(function (index) {
                         gsap.to($(this), {
                             width: "0%",
@@ -285,14 +300,14 @@
                             ease: "power2.out"
                         });
                     });
-                    observer.unobserve(entry.target); // Stop observing after animation starts
+                    observerTextReveal.unobserve(entry.target); // Stop observing after animation starts
                 }
             });
         }, {
             threshold: 0
         }); // Adjust threshold as needed
 
-        observer.observe(document.getElementById('text-reveal-section'));
+        observerTextReveal.observe(document.getElementById('text-reveal-section'));
     </script>
 </body>
 
